@@ -1,1 +1,3 @@
-#Calidad Bitel <br> Proyecto de prácticas pre profesionales de Bautista
+# Calidad Bitel 
+
+Proyecto de prácticas pre profesionales de Bautista
