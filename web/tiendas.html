@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <meta name="description" content="Gestión de tiendas del programa encargado de reportes y auditoría de las tiendas de Bitel">
+      <meta name="author" content="Christian Bautista">
+      <link rel="icon" href="img/bitel-logo3.png">
+      <title>Calidad Bitel | Tiendas </title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    </head>
+    <body>
+      <div class="container-fluid">
+	<div class="row">
+	  <nav class="navbar bg-light fixed-top">
+	    <div class="container-fluid">
+	      <a class="navbar-brand" href="#">Calidad Bitel - <strong>Tiendas</strong></a>
+	      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+		<span class="navbar-toggler-icon"></span>
+	      </button>
+	      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+		<div class="offcanvas-header">
+		    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Navegación</h5>
+		    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body"> 
+		  <ul class="navbar-nav justify-content-center flex-grow-1 pe-3">
+			<li class="nav-item text-center pb-auto">
+			    <span data-feather="user"></span>
+			    <a class="nav-link active pb-0" href="#"><strong>C. Bautista</strong></a>
+			</li>
+			<li class="nav-item text-center">
+			  <a class="nav-link disable pt-0" href="mailto:c.bautista@bitel.com.pe"><em class="text-info">c.bautista@bitel.com.pe</em></a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link active" aria-current="page" href="#"><span data-feather="home"></span>  Inicio</a>
+			</li>
+			<li class="nav-item">
+			    <a class="nav-link active" aria-current="page" href="#"><span data-feather="shopping-bag"></span>  Tiendas</a>
+			</li>
+			<li class="nav-item">
+			    <a class="nav-link active" aria-current="page" href="#"><span data-feather="check-square"></span>  Requerimientos</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link active" aria-current="page" href="#"><span data-feather="table"></span>   Reportes</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link active" aria-current="page" href="#"><span data-feather="log-out"></span>   Salir</a>
+			</li>
+		    </ul>
+		</div>
+	      </div>
+	    </div>
+	  </nav>
+	</div>
+	<div class="row mt-5"> 
+	  <div class="container-fluid">
+	    <div class="row mt-3">
+	      <!--<div class="column"></div>
+	      <div class="column"></div>-->
+	      <form>
+		<div class="row">
+		  <div class="col-1 mb-3">
+		    <label for="identidad" class="form-label">Código</label>
+		  </div>
+		  <div class="col-2 mb-3">
+		    <input type="text" class="form-control" id="identidad" aria-describedby="codigoDes">
+		    <div id="codigoDes" class="form-text">Ejemplo: T00023</div>
+		  </div>
+		  <div class="col-auto mb-3">
+		    <select class="form-control">
+		      <option>Branch</option>
+		      <option>B87623</option>
+		      <option>B14625</option>
+		    </select>
+		  </div>
+		  <div class="col-auto mb-3">
+		    <select class="form-control">
+		      <option>Sucursal</option>
+		      <option>S45678</option>
+		      <option>S35378</option>
+		    </select>
+		  </div>
+		  <div class="col-auto mb-3">
+		    <select class="form-control">
+		      <option>Tipo</option>
+		      <option>CMD</option>
+		      <option>SSS</option>
+		    </select>
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-1 mb-3">
+		    <label for="direccion" class="form-label">Dirección</label>
+		  </div>
+		  <div class="col-5 mb-3">
+		    <input type="text" class="form-control" id="direccion">
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-1 mb-3">
+		    <label for="descripcion" class="form-label">Descripción</label>
+		  </div>
+		  <div class="col-5 mb-3">
+		    <textarea rows="2" class="form-control" id="descripcion"></textarea>
+		  </div>
+		</div>
+	      </form>
+	    </div>
+	    <div class="row">
+	      <div class="table-responsive">
+		<table class="table table-striped table-sm">
+		  <thead>
+		    <tr>
+		      <th>Código</th>
+		      <th>Branch</th>
+		      <th>Sucursal</th>
+		      <th>Dirección</th>
+		      <th>Creación</th>
+		      <th></th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr>
+		      <td>T01987</td>
+		      <td>B87623</td>
+		      <td>S45678</td>
+		      <td>Jicamarca Anexo 22</td>
+		      <td>12/06/2022</td>
+		      <td>
+			<div class="form-check">
+			  <input class="form-check-input" type="checkbox" value="" id="check">
+			</div>
+		      </td>
+		    <tr>
+		      <td>T25947</td>
+		      <td>B14625</td>
+		      <td>S35378</td>
+		      <td>Jicamarca Anexo 22</td>
+		      <td>12/06/2022</td>
+		      <td>
+			<div class="form-check">
+			  <input class="form-check-input" type="checkbox" value="" id="check">
+			</div>
+		      </td>
+		    </tr>
+		    </tr>
+		  </tbody>
+		</table>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+    </script>
+    </body>
+</html> 
