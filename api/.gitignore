@@ -1,0 +1,5 @@
+*.lock
+vendor/
+composer.*
+#Constantes para el sistema
+global-vars.php
