@@ -13,17 +13,15 @@ var CalidadBitel = function() {
 			Notiflix.Notify.Success("Sesión iniciada.")
 
 			if(parametros.persistencia) {
-				window.localStorage.setItem("token", this.token)
-				//~ console.log("Sesión perenne.")
+				window.localStorage.setItem("token", calidad.token)
 			}
 			else {
-				window.sessionStorage.setItem("token", this.token)
-				//~ console.log("Sesión efímera.")
+				window.sessionStorage.setItem("token", calidad.token)
 			}
 
 			//Y lo mandamos a que use el programa (posiblemente donde se quedó)
 			if( this.urlReferenciador && ( this.urlReferenciador != "/acceder" ) ) {
-				app.navigate( this.urlReferenciador, true )
+				app.navigate( calidad.urlReferenciador, true )
 			}
 			else {
 				app.navigate("/", true)
@@ -63,8 +61,13 @@ var CalidadBitel = function() {
 
 		switch(respuesta.action) {
 			case 1:
-				manejarAcceso(respuesta.cheveridad, respuesta.params)
-				break
+				manejarAcceso(respuesta.cheveridad, respuesta.params);break
+			case 15:
+				manejarListaTiendas(respuesta.cheveridad, respuesta.params);break
+			case 16:
+				manejarListaMetadatosTiendae(respuesta.cheveridad, respuesta.params);break
+			case 101:
+				manejarRegistroTienda(respuesta.cheveridad, respuesta.params);break
 		}
 	}
 
@@ -112,7 +115,7 @@ var CalidadBitel = function() {
 
 	this.restringirAcceso = function() {
 		const rutaActual = window.location.pathname
-		if( this.rutasLibres.includes( rutaActual ) ) {
+		if( rutasLibres.includes( rutaActual ) ) {
 			return false
 		}
 
@@ -142,6 +145,22 @@ var CalidadBitel = function() {
 		)
 	}
 
+	this.listarTiendas = function(formulario) {
+		const busqueda = {
+			action: 15,
+			token: calidad.token,
+			params: {
+				param1: 2
+			}
+		}
+	}
+
+	var rutas = [
+		/^\/?$/m,//0
+		/^\/?tiendas\/?$/m,//1
+		/^\/?requerimientos\/?$/m,//2
+	]
+
 	this.ejecutarSegunRuta = function(ruta) {
 		if(this.restringirAcceso()) {
 			return
@@ -149,15 +168,96 @@ var CalidadBitel = function() {
 
 		const datos = parseJwt(this.token)
 
-		const contenedor = document.getElementById("usuario-tag")
-		contenedor.appendChild(document.createTextNode(datos.alias))
+		document.getElementById("usuario-tag").appendChild(document.createTextNode(datos.alias))
+		document.getElementById("correo-tag").appendChild(document.createTextNode(datos.email))
+
+		if(ruta == null) {
+			ruta = window.location.pathname
+		}
+		switch(true) {
+			case rutas[1].test(ruta):
+				listarMetadatosTiendae();break
+			case rutas[2].test(ruta):
+		}
 	}
 
-	this.rutasLibres = ["/acceder"]
+	var rutasLibres = ["/acceder"]
 
 	this.token = window.localStorage.getItem("token")
 	if(this.token == null) {
 		this.token = window.sessionStorage.getItem("token")
+	}
+
+	var listarMetadatosTiendae = function() {
+		const listado = {
+			action: 16,
+			token: calidad.token
+		}
+
+		mensajear( JSON.stringify( listado ) )
+	}
+
+	var manejarListaMetadatosTiendae = function(cheveridad, parametros) {
+		if(cheveridad) {
+			//Almacenamiento temporal
+			calidad.branches = parametros.branches
+			const formulario = document.getElementById("producto")
+			const branches = formulario.elements.branch
+			for(const i of Object.keys(parametros.branches)) {
+				const branch = parametros.branches[i]
+				const opcionBranch = document.createElement("option")
+				opcionBranch.value = branch.identidad
+				opcionBranch.appendChild( document.createTextNode(branch.descripcion) )
+				branches.appendChild( opcionBranch )
+			}
+
+			//No se debe alternar porque la lista inicia con valor indefinido
+			//calidad.alternarSucursales(formulario.elements.sucursal)
+		}
+		else {
+			Notiflix.Notify.Warning(parametros.info)
+		}
+	}
+
+	this.alternarSucursales = function(selectorBranch, selectorSucursal) {
+		while(selectorSucursal.firstChild) {
+			selectorSucursal.firstChild.remove()
+		}
+
+		for(const sucursal of this.branches[selectorBranch.value].sucursales) {
+			const opcionSucursal = document.createElement("option")
+			opcionSucursal.value = sucursal.identidad
+			opcionSucursal.appendChild(document.createTextNode(`${sucursal.codigo} (${sucursal.descripcion})`))
+			selectorSucursal.appendChild(opcionSucursal)
+		}
+	}
+
+	this.guardarTienda = function(formulario) {
+		const identidad = formulario.elements.identidad.value.trim()
+
+		const tienda = {
+			tienda: 17,
+			token: this.token,
+			params: {
+				identidad: identidad == "" ? null : identidad,
+				codigo: formulario.elements.codigo.value.trim(),
+				sucursal: formulario.elements.sucursal.value,
+				tipo: formulario.elements.tipo.value,
+				direccion: formulario.elements.direccion.value.trim(),
+				descripcion: formulario.elements.descripcion.value.trim()
+			}
+		}
+
+		mensajear( JSON.stringify( tienda ) )
+	}
+
+	var manejarGuardadoTiendae = function(cheveridad, parametros) {
+		if(cheveridad) {
+			Notiflix.Report.Success(parametros.info, "Registro correcto", "Aceptar")
+		}
+		else {
+			Notiflix.Report.Warning("Inconvenientes", parametros.info, "Aceptar")
+		}
 	}
 }
 
@@ -171,9 +271,7 @@ window.onload = function() {
 	app = new senna.App()
 	app.addSurfaces(["lienzo"])
 	app.addRoutes([
-		new senna.Route("/", senna.HtmlScreen),
-		new senna.Route("/tiendas", senna.HtmlScreen),
-		new senna.Route("/acceder", senna.HtmlScreen)
+		new senna.Route(/([\/]{1}.*\/?)/, senna.HtmlScreen)
 	])
 
 	calidad = new CalidadBitel()

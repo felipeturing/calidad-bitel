@@ -48,13 +48,19 @@ class Calidad implements MessageComponentInterface {
 			switch($datos['action']) {
 				case -1:
 					$this->cerrarSesion($datos, $token, $from, $respuesta);
-					break;
+					return;
 				case 1:
 					$this->iniciarSesion($datos, $from, $respuesta);
-					break;
+					return;
 				case 15:
-					$this->listarTiendas($datos, $from, $respuesta);
-					break;
+					$this->listarTiendas($datos, $token, $from, $respuesta);
+					return;
+				case 16:
+					$this->listarMetadatosTiendae($datos, $token, $from, $respuesta);
+					return;
+				case 17:
+					$this->guardarTienda($datos, $token, $from, $respuesta);
+					return;
 				default:
 					$respuesta['cheveridad'] = false;
 					$respuesta['params']['info'] = 'No existe opción';
@@ -84,7 +90,7 @@ class Calidad implements MessageComponentInterface {
 		$clave = $datos['params']['password'];
 
 		//Se busca en la base de datos
-		$sentenciaSeleccionadora = $this->bd->prepare('SELECT identidad, hash, nombre FROM Analista WHERE usuario = ? LIMIT 1');
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT identidad, hash, usuario, nombre FROM Analista WHERE usuario = ? LIMIT 1');
 		$sentenciaSeleccionadora->bind_param('s', $usuario);
 		$sentenciaSeleccionadora->execute();
 		$resultado = $sentenciaSeleccionadora->get_result();
@@ -108,7 +114,8 @@ class Calidad implements MessageComponentInterface {
 			//Se obtiene un token para decirle que puede usar el programa
 			$datos = array();
 			$datos['uid'] = $usuario['identidad'];
-			$datos['alias'] = "{$usuario['nombre']}";
+			$datos['alias'] = $usuario['nombre'];
+			$datos['email'] = $usuario['usuario'];
 			$datos['pers'] = $recordarlo ? time() + 31104000 : 86400;//Agregar más tiempo si hay persistencia
 
 
@@ -126,5 +133,97 @@ class Calidad implements MessageComponentInterface {
 	}
 
 	private function cerrarSesion(&$datos, &$token, &$from, $respuesta) {
+	}
+
+	private function listarTiendas(&$datos, &$token, &$from, $respuesta) {
+		//Cotejar que datos de filtración sean los adecuados
+		$direccion = $datos['params']['direccion'];
+		$sucursal = $datos['params']['sucursal'];
+		$tipo = $datos['params']['tipo'];
+
+		//Para paginación
+		$pagina = $datos['params']['pagina'];
+		if( ! isset( $pagina ) && ! is_int( $pagina ) && $pagina < 1 )  {
+			$respuesta['cheveridad'] = false;
+			$respuesta['params']['info'] = 'Problemas de paginación.';
+			$from->send(json_encode($respuesta));
+			return;
+		}
+		$pagina = ($pagina - 1) << 3;
+
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT FROM Tienda WHERE tipo = ? AND identidadSucursal = ? OR direccion LIKE \'%?%\'');
+		$sentenciaSeleccionadora->bind_param('iis', $tipo, $sucursal, $direccion);
+		$resultado = $sentenciaSeleccionadora->execute();
+
+		if($resultado) {
+			$resultado = $sentenciaSeleccionadora->get_result();
+			while($fila = $resultado->fetch_assoc()) {
+				$respuesta['params']['tiendas'][] = $fila;
+			}
+			$resultado->free();
+		}
+		else {
+			$respuesta['cheveridad'] = false;
+			$respuesta['params']['info'] = 'BD no ejecutó bien.';
+		}
+
+		$from->send( json_encode( $respuesta ) );
+	}
+
+	private function guardarTienda(&$datos, &$token, &$from, $respuesta) {
+		//Si viene una identidad entonces es para editar.
+		if( isset( $datos['params']['identidad'] ) ) {
+			$respuesta['params']['info'] = 'Actualizado';
+		}
+		else {//actualizar
+			$sentenciaInsertadora = $this->bd->prepare('INSERT INTO tienda(identidadSucursal, descripcion, codigo, direccion, tipo, instante) VALUES(?, ?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))');
+			$sentenciaInsertadora->bind_param('isssi', $datos['params']['sucursal'], $datos['params']['descripcion'], $datos['params']['codigo'], $datos['params']['direccion'], $datos['params']['tipo']);
+			$sentenciaInsertadora->execute();
+
+			//Si hay identidad es porque se guardó bien.
+			$identidadDeCuenta = $this->bd->insert_id;
+
+			if($identidadDeCuenta > 0) {
+				$respuesta['cheveridad'] = true;
+				$respuesta['params']['info'] = 'Creado';
+			}
+			else {
+				$respuesta['cheveridad'] = false;
+				$respuesta['params']['info'] = 'No se pudo crear registro.';
+			}
+		}
+
+		$from->send( json_encode( $respuesta ) );
+	}
+
+	/**
+	 * Para poblar los selectores de la tienda.
+	 */
+	private function listarMetadatosTiendae(&$datos, &$token, &$from, $respuesta) {
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT * FROM Branch');
+		//~ $sentenciaSeleccionadora->bind_param('', $);
+		if( $sentenciaSeleccionadora->execute() ) {
+			$resultado = $sentenciaSeleccionadora->get_result();
+			while($fila = $resultado->fetch_assoc()) {
+				$respuesta['params']['branches'][$fila['identidad']] = $fila;
+			}
+			$resultado->free();
+			$respuesta['cheveridad'] = true;
+
+			$sentenciaSeleccionadora = $this->bd->prepare('SELECT * FROM Sucursal');
+			if( $sentenciaSeleccionadora->execute() ) {
+				$resultado = $sentenciaSeleccionadora->get_result();
+				while($fila = $resultado->fetch_assoc()) {
+					$respuesta['params']['branches'][$fila['identidadBranch']]['sucursales'][] = $fila;
+				}
+				$resultado->free();
+			}
+		}
+		else {
+			$respuesta['cheveridad'] = false;
+			$respuesta['params']['info'] = 'BD no ejecutó bien.';
+		}
+
+		$from->send( json_encode( $respuesta ) );
 	}
 }
