@@ -1,0 +1,38 @@
+body{
+    background-color: #FDF4C3;
+    font-size: 0.9em;
+}
+
+thead{
+    background-color: #5b8e7d;
+    color: white;
+}
+
+tr:nth-child(even){
+    background-color: #F0B887;
+}
+
+tbody tr:nth-child(odd){
+    background-color: #FAEEB0;
+}
+
+.toast-header{
+    background-color: #5b8e7d;
+    color: white;
+}
+div.toast-header small{
+    color: white;
+}
+
+.card-header{
+    background-color: #5b8e7d;
+    color: white;
+}
+
+.card-body{
+    background-color: #FDF4C3;
+}
+
+.navbar{
+    background-color: #353531;
+}

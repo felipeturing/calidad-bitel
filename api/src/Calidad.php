@@ -90,7 +90,7 @@ class Calidad implements MessageComponentInterface {
 		$clave = $datos['params']['password'];
 
 		//Se busca en la base de datos
-		$sentenciaSeleccionadora = $this->bd->prepare('SELECT identidad, hash, usuario, nombre FROM Analista WHERE usuario = ? LIMIT 1');
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT identidad, hash, usuario, nombre FROM analista WHERE usuario = ? LIMIT 1');
 		$sentenciaSeleccionadora->bind_param('s', $usuario);
 		$sentenciaSeleccionadora->execute();
 		$resultado = $sentenciaSeleccionadora->get_result();
@@ -151,7 +151,7 @@ class Calidad implements MessageComponentInterface {
 		}
 		$pagina = ($pagina - 1) << 3;
 
-		$sentenciaSeleccionadora = $this->bd->prepare('SELECT FROM Tienda WHERE tipo = ? AND identidadSucursal = ? OR direccion LIKE \'%?%\'');
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT FROM tienda WHERE tipo = ? AND identidadSucursal = ? OR direccion LIKE \'%?%\'');
 		$sentenciaSeleccionadora->bind_param('iis', $tipo, $sucursal, $direccion);
 		$resultado = $sentenciaSeleccionadora->execute();
 
@@ -200,7 +200,7 @@ class Calidad implements MessageComponentInterface {
 	 * Para poblar los selectores de la tienda.
 	 */
 	private function listarMetadatosTiendae(&$datos, &$token, &$from, $respuesta) {
-		$sentenciaSeleccionadora = $this->bd->prepare('SELECT * FROM Branch');
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT * FROM branch');
 		//~ $sentenciaSeleccionadora->bind_param('', $);
 		if( $sentenciaSeleccionadora->execute() ) {
 			$resultado = $sentenciaSeleccionadora->get_result();
@@ -210,7 +210,7 @@ class Calidad implements MessageComponentInterface {
 			$resultado->free();
 			$respuesta['cheveridad'] = true;
 
-			$sentenciaSeleccionadora = $this->bd->prepare('SELECT * FROM Sucursal');
+			$sentenciaSeleccionadora = $this->bd->prepare('SELECT * FROM sucursal');
 			if( $sentenciaSeleccionadora->execute() ) {
 				$resultado = $sentenciaSeleccionadora->get_result();
 				while($fila = $resultado->fetch_assoc()) {

@@ -236,7 +236,7 @@ var CalidadBitel = function() {
 		const identidad = formulario.elements.identidad.value.trim()
 
 		const tienda = {
-			tienda: 17,
+			action: 17,
 			token: this.token,
 			params: {
 				identidad: identidad == "" ? null : identidad,
