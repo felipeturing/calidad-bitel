@@ -66,6 +66,8 @@ var CalidadBitel = function() {
 				manejarListaTiendas(respuesta.cheveridad, respuesta.params);break
 			case 16:
 				manejarListaMetadatosTiendae(respuesta.cheveridad, respuesta.params);break
+			case 17:
+				manejarGuardadoTiendae(respuesta.cheveridad, respuesta.params);break
 			case 101:
 				manejarRegistroTienda(respuesta.cheveridad, respuesta.params);break
 		}
@@ -148,10 +150,58 @@ var CalidadBitel = function() {
 	this.listarTiendas = function(formulario) {
 		const busqueda = {
 			action: 15,
-			token: calidad.token,
+			token: this.token,
 			params: {
-				param1: 2
+				pagina: 1,
+				direccion: formulario.elements.direccion.value.trim(),
+				sucursal: formulario.elements.sucursal.value,
+				tipo: formulario.elements.tipo.value
 			}
+		}
+
+		mensajear( JSON.stringify( busqueda ) )
+	}
+
+	var manejarListaTiendas = function(cheveridad, parametros) {
+		if(cheveridad) {
+			const tabla = document.getElementById("tiendas")
+			while(tabla.firstChild) {
+				tabla.firstChild.remove()
+			}
+			for(const tienda of parametros.tiendas) {
+				const tr = tabla.insertRow(0)//tr
+
+				tr.insertCell()/*td*/.appendChild(document.createTextNode(tienda.codigo))
+				tr.insertCell().appendChild(document.createTextNode(tienda.branch))
+				tr.insertCell().appendChild(document.createTextNode(tienda.sucursal))
+				tr.insertCell().appendChild(document.createTextNode(tienda.tipo))
+				tr.insertCell().appendChild(document.createTextNode(tienda.direccion))
+				tr.insertCell().appendChild(document.createTextNode(tienda.creacion))
+
+				const controles = tr.insertCell()
+				const editor = document.createElement("button")
+				editor.type = "button"
+				editor.setAttribute("class", "btn btn-outline-secondary btn-sm")
+				const iconoEditor = document.createElement("span")
+				iconoEditor.setAttribute("data-feather", "edit")
+				editor.appendChild(iconoEditor)
+				editor.onclick = function() {
+					volcarTiendaParaEditar(tienda)
+				}
+				controles.appendChild(editor)
+				const eliminador = document.createElement("button")
+				eliminador.type = "button"
+				eliminador.setAttribute("class", "btn btn-danger btn-sm")
+				const iconoEliminador = document.createElement("span")
+				iconoEliminador.setAttribute("data-feather", "trash")
+				eliminador.appendChild(iconoEliminador)
+				controles.appendChild( document.createTextNode( '\u00A0' ) )
+				controles.appendChild(eliminador)
+			}
+			feather.replace()
+		}
+		else {
+			Notiflix.Notify.Warning(parametros.info)
 		}
 	}
 
@@ -201,18 +251,20 @@ var CalidadBitel = function() {
 		if(cheveridad) {
 			//Almacenamiento temporal
 			calidad.branches = parametros.branches
-			const formulario = document.getElementById("producto")
-			const branches = formulario.elements.branch
-			for(const i of Object.keys(parametros.branches)) {
-				const branch = parametros.branches[i]
-				const opcionBranch = document.createElement("option")
-				opcionBranch.value = branch.identidad
-				opcionBranch.appendChild( document.createTextNode(branch.descripcion) )
-				branches.appendChild( opcionBranch )
-			}
+			const formularios = document.getElementsByClassName("formulario-tienda")
+			for(const formulario of formularios) {
+				const branches = formulario.elements.branch
+				for(const i of Object.keys(parametros.branches)) {
+					const branch = parametros.branches[i]
+					const opcionBranch = document.createElement("option")
+					opcionBranch.value = branch.identidad
+					opcionBranch.appendChild( document.createTextNode(branch.descripcion) )
+					branches.appendChild( opcionBranch )
+				}
 
-			//No se debe alternar porque la lista inicia con valor indefinido
-			//calidad.alternarSucursales(formulario.elements.sucursal)
+				//No se debe alternar porque la lista inicia con valor indefinido
+				//calidad.alternarSucursales(formulario.elements.sucursal)
+			}
 		}
 		else {
 			Notiflix.Notify.Warning(parametros.info)
@@ -227,13 +279,14 @@ var CalidadBitel = function() {
 		for(const sucursal of this.branches[selectorBranch.value].sucursales) {
 			const opcionSucursal = document.createElement("option")
 			opcionSucursal.value = sucursal.identidad
-			opcionSucursal.appendChild(document.createTextNode(`${sucursal.codigo} (${sucursal.descripcion})`))
+			opcionSucursal.appendChild(document.createTextNode(sucursal.codigo))
 			selectorSucursal.appendChild(opcionSucursal)
 		}
 	}
 
 	this.guardarTienda = function(formulario) {
 		const identidad = formulario.elements.identidad.value.trim()
+		debugger
 
 		const tienda = {
 			action: 17,
@@ -258,6 +311,18 @@ var CalidadBitel = function() {
 		else {
 			Notiflix.Report.Warning("Inconvenientes", parametros.info, "Aceptar")
 		}
+	}
+
+	/**
+	 * @var oTienda es una estructura en forma de objeto de la tienda.
+	 */
+	var volcarTiendaParaEditar = function(oTienda) {
+		debugger
+		const formulario = document.getElementById("creador-tienda")
+		formulario.elements.identidad.value = oTienda.identidad
+		formulario.elements.codigo.value = oTienda.codigo
+		formulario.elements.branch.value = oTienda.branch
+		formulario.elements.direccion.value = oTienda.direccion
 	}
 }
 

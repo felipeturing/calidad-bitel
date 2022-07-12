@@ -64,7 +64,7 @@
 						<div class="card mt-4 mb-2">
 							<h5 class="card-header">Formulario</h5>
 							<div class="card-body">
-								<form id="producto" onsubmit="calidad.guardarTienda(this)">
+								<form class="formulario-tienda" onsubmit="calidad.guardarTienda(this);return false" id="creador-tienda">
 									<input type="hidden" name="identidad" />
 									<div class="row">
 										<div class="col-1 mb-3">
@@ -75,12 +75,12 @@
 											<div id="codigoDes" class="form-text">Ejemplo: T00023.</div>
 										</div>
 										<div class="col-auto mb-3">
-											<select class="form-select" aria-label="Branch" name="branch" onchange="calidad.alternarSucursales(this, document.getElementById('sucursal'))">
+											<select class="form-select" aria-label="Branch" name="branch" onchange="calidad.alternarSucursales(this, document.getElementById('sucursal1'))">
 												<option selected hidden value="">Branch</option>
 											</select>
 										</div>
 										<div class="col-auto mb-3">
-											<select class="form-select" aria-label="Sucursal" name="sucursal" id="sucursal">
+											<select class="form-select" aria-label="Sucursal" name="sucursal" id="sucursal1">
 												<option selected hidden value="">Sucursal</option>
 											</select>
 										</div>
@@ -114,40 +114,30 @@
 						</div>
 						<div class="card">
 							<h5 class="card-header">Tiendas</h5>
-							<form onsubmit="calidad.listarTiendas(this);return false">
+							<form class="formulario-tienda" onsubmit="calidad.listarTiendas(this);return false">
 								<div class="row mt-2 ms-2">
 									<div class="col-5 mb-3">
 										<div class="input-group">
-											<input type="text" class="form-control" placeholder="Buscar por dirección" aria-label="Buscar por dirección" aria-describedby="buscador" id="direccion">
-											<button class="btn btn-outline-secondary" type="button" id="buscador">Buscar</button>
+											<input type="text" class="form-control" placeholder="Buscar por dirección" aria-label="Buscar por dirección" aria-describedby="buscador" name="direccion">
+											<button class="btn btn-outline-secondary" type="submit" id="buscador">Buscar</button>
 										</div>
 									</div>
 									<div class="col-auto mb-3">
-										<select class="form-select" aria-label="Branch">
-										  <option selected>Branch</option>
-										  <option value="1">B87623</option>
-										  <option value="2">B14625</option>
+										<select class="form-select" aria-label="Branch" name="branch" onchange="calidad.alternarSucursales(this, document.getElementById('sucursal2'))">
+											<option selected hidden value="">Branch</option>
 										</select>
 									</div>
 									<div class="col-auto mb-3">
-										<select class="form-select" aria-label="Sucursal">
-										  <option selected>Sucursal</option>
-										  <option value="1">S45678</option>
-										  <option value="2">S35378</option>
+										<select class="form-select" aria-label="Sucursal" name="sucursal" id="sucursal2">
+											<option selected hidden value="">Sucursal</option>
 										</select>
 									</div>
 									<div class="col-auto mb-3">
-										<select class="form-select" aria-label="Tipo">
-										  <option selected>Tipo</option>
-										  <option value="1">CMD</option>
-										  <option value="2">SSS</option>
+										<select class="form-select" aria-label="Tipo" name="tipo">
+											<option selected hidden value="">Tipo</option>
+											<option value="1">CMD</option>
+											<option value="2">SSS</option>
 										</select>
-									</div>
-									<div class="col-auto mb-3">
-										<button type="button" class="btn btn-outline-secondary btn-sm"><span data-feather="edit"></span></button>
-									</div>
-									<div class="col-auto mb-3">
-										<button type="button" class="btn btn-outline-secondary btn-sm"><span data-feather="trash"></span></button>
 									</div>
 								</div>
 							</form>
@@ -165,33 +155,34 @@
 												<th></th>
 											</tr>
 										</thead>
-										<tbody>
+										<tbody id="tiendas">
 											<tr>
-												<td>T01987</td>
-												<td>B87623</td>
-												<td>S45678</td>
-												<td>CMD</td>
+												<td data-codigo="T01987">T01987</td>
+												<td data-branch="B87623">B87623</td>
+												<td data-sucursal="S45678">S45678</td>
+												<td data-tipo="0">CMD</td>
+												<td data-direccion="Jicamarca Anexo 22">Jicamarca Anexo 22</td>
+												<td>12/06/2022</td>
+												<td>
+													<button type="button" class="btn btn-outline-secondary btn-sm"><span data-feather="edit"></span></button>
+													<button type="button" class="btn btn-outline-danger btn-sm"><span data-feather="trash"></span></button>
+												</td>
+											</tr>
+<!--
+											<tr>
+												<td>T25947</td>
+												<td>B14625</td>
+												<td>S35378</td>
+												<td>SSS</td>
 												<td>Jicamarca Anexo 22</td>
 												<td>12/06/2022</td>
 												<td>
 													<div class="form-check">
-														<input class="form-check-input" type="checkbox" value="" id="check">
+														<input class="form-check-input" type="checkbox" value="" />
 													</div>
 												</td>
-												<tr>
-													<td>T25947</td>
-													<td>B14625</td>
-													<td>S35378</td>
-													<td>SSS</td>
-													<td>Jicamarca Anexo 22</td>
-													<td>12/06/2022</td>
-													<td>
-														<div class="form-check">
-															<input class="form-check-input" type="checkbox" value="" id="check">
-														</div>
-													</td>
-												</tr>
 											</tr>
+-->
 										</tbody>
 									</table>
 								</div>

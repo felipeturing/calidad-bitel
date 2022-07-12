@@ -137,7 +137,7 @@ class Calidad implements MessageComponentInterface {
 
 	private function listarTiendas(&$datos, &$token, &$from, $respuesta) {
 		//Cotejar que datos de filtración sean los adecuados
-		$direccion = $datos['params']['direccion'];
+		$direccion = "%{$datos['params']['direccion']}%";
 		$sucursal = $datos['params']['sucursal'];
 		$tipo = $datos['params']['tipo'];
 
@@ -151,11 +151,12 @@ class Calidad implements MessageComponentInterface {
 		}
 		$pagina = ($pagina - 1) << 3;
 
-		$sentenciaSeleccionadora = $this->bd->prepare('SELECT FROM tienda WHERE tipo = ? AND identidadSucursal = ? OR direccion LIKE \'%?%\'');
+		$sentenciaSeleccionadora = $this->bd->prepare('SELECT identidad, codigo, direccion, tipo, instante FROM tienda WHERE tipo = ? AND identidadSucursal = ? OR direccion LIKE ?');
 		$sentenciaSeleccionadora->bind_param('iis', $tipo, $sucursal, $direccion);
 		$resultado = $sentenciaSeleccionadora->execute();
 
 		if($resultado) {
+			$respuesta['cheveridad'] = true;
 			$resultado = $sentenciaSeleccionadora->get_result();
 			while($fila = $resultado->fetch_assoc()) {
 				$respuesta['params']['tiendas'][] = $fila;
@@ -171,26 +172,45 @@ class Calidad implements MessageComponentInterface {
 	}
 
 	private function guardarTienda(&$datos, &$token, &$from, $respuesta) {
-		//Si viene una identidad entonces es para editar.
-		if( isset( $datos['params']['identidad'] ) ) {
-			$respuesta['params']['info'] = 'Actualizado';
+		try {
+			//Si viene una identidad entonces es para editar.
+			//Nota: Podría usarse UPDATE ON DUPLICATE
+			if( isset( $datos['params']['identidad'] ) ) {
+				$respuesta['params']['info'] = 'Actualizado';
+				$sentenciaActualizadora = $this->bd->prepare('UPDATE tienda SET identidadSucursal = ?, descripcion = ?, codigo = ?, direccion = ?, tipo = ? WHERE identidad = ?');
+				$sentenciaActualizadora->bind_param('isssii', $datos['params']['sucursal'], $datos['params']['descripcion'], $datos['params']['codigo'], $datos['params']['direccion'], $datos['params']['tipo'], $datos['params']['identidad']);
+				$sentenciaActualizadora->execute();
+
+				if($this->bd->affected_rows > 0) {
+					$respuesta['cheveridad'] = true;
+					$respuesta['params']['info'] = 'Actualizado.';
+				}
+				else {
+					$respuesta['cheveridad'] = false;
+					$respuesta['params']['info'] = 'No se pudo actualizar.';
+				}
+			}
+			else {//actualizar
+				$sentenciaInsertadora = $this->bd->prepare('INSERT INTO tienda(identidadSucursal, descripcion, codigo, direccion, tipo, instante) VALUES(?, ?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))');
+				$sentenciaInsertadora->bind_param('isssi', $datos['params']['sucursal'], $datos['params']['descripcion'], $datos['params']['codigo'], $datos['params']['direccion'], $datos['params']['tipo']);
+				$sentenciaInsertadora->execute();
+
+				//Si hay identidad es porque se guardó bien.
+				$identidadDeCuenta = $this->bd->insert_id;
+
+				if($identidadDeCuenta > 0) {
+					$respuesta['cheveridad'] = true;
+					$respuesta['params']['info'] = 'Creado';
+				}
+				else {
+					$respuesta['cheveridad'] = false;
+					$respuesta['params']['info'] = 'No se pudo crear registro.';
+				}
+			}
 		}
-		else {//actualizar
-			$sentenciaInsertadora = $this->bd->prepare('INSERT INTO tienda(identidadSucursal, descripcion, codigo, direccion, tipo, instante) VALUES(?, ?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))');
-			$sentenciaInsertadora->bind_param('isssi', $datos['params']['sucursal'], $datos['params']['descripcion'], $datos['params']['codigo'], $datos['params']['direccion'], $datos['params']['tipo']);
-			$sentenciaInsertadora->execute();
-
-			//Si hay identidad es porque se guardó bien.
-			$identidadDeCuenta = $this->bd->insert_id;
-
-			if($identidadDeCuenta > 0) {
-				$respuesta['cheveridad'] = true;
-				$respuesta['params']['info'] = 'Creado';
-			}
-			else {
-				$respuesta['cheveridad'] = false;
-				$respuesta['params']['info'] = 'No se pudo crear registro.';
-			}
+		catch(\Exception $e) {
+			$respuesta['cheveridad'] = false;
+			$respuesta['params']['info'] = 'Datos inconsistentes.';
 		}
 
 		$from->send( json_encode( $respuesta ) );
